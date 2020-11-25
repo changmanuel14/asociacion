@@ -7,13 +7,13 @@ from asociados.models import Asociado, Especialidad, Subespecialidad
 class EspecialidadNode(DjangoObjectType):
     class Meta:
         model = Especialidad
-        filter_fields = ['categoria', 'asociados']
+        filter_fields = ['categoria', 'especialidad']
         interfaces = (relay.Node, )
 
 class SubespecialidadNode(DjangoObjectType):
     class Meta:
         model = Subespecialidad
-        filter_fields = ['categoria', 'asociados']
+        filter_fields = ['categoria', 'subespecialidad']
         interfaces = (relay.Node, )
 
 class AsociadoNode(DjangoObjectType):
@@ -55,8 +55,8 @@ class CreateAsociado(graphene.Mutation):
         telefono = graphene.Int()
         direccion = graphene.String()
         correo = graphene.String()
-        especialidad = graphene.List(graphene.ID)
-        subespecialidad = graphene.List(graphene.ID)
+        especialidad = graphene.Int()
+        subespecialidad = graphene.Int()
 
     asociado = graphene.Field(AsociadoNode)
 
@@ -68,22 +68,10 @@ class CreateAsociado(graphene.Mutation):
             fecha_renMem=fecha_renMem,
             telefono=telefono,
             direccion=direccion,
-            correo=correo
+            correo=correo,
+            especialidad = Especialidad.objects.get(pk=especialidad),
+            subespecialidad = Subespecialidad.objects.get(pk=subespecialidad)
         )
-
-        if especialidad is not None:
-            especialidad_set = []
-            for especialidad_id in especialidad:
-                especialidad_object = Especialidad.objects.get(pk=especialidad_id)
-                especialidad_set.append(especialidad_object)
-            asociado.especialidad.set(especialidad_set)
-
-        if subespecialidad is not None:
-            subespecialidad_set = []
-            for subespecialidad_id in subespecialidad:
-                subespecialidad_object = Subespecialidad.objects.get(pk=subespecialidad_id)
-                subespecialidad_set.append(subespecialidad_object)
-            asociado.subespecialidad.set(subespecialidad_set)
             
         asociado.save()
 
@@ -93,6 +81,7 @@ class CreateAsociado(graphene.Mutation):
 
 class UpdateAsociado(graphene.Mutation):
     class Arguments:
+        id = graphene.Int()
         nombre = graphene.String()
         apellido = graphene.String()
         fecha_nacimiento = graphene.types.datetime.DateTime()
@@ -100,8 +89,8 @@ class UpdateAsociado(graphene.Mutation):
         telefono = graphene.Int()
         direccion = graphene.String()
         correo = graphene.String()
-        especialidad = graphene.List(graphene.ID)
-        subespecialidad = graphene.List(graphene.ID)
+        especialidad = graphene.Int()
+        subespecialidad = graphene.Int()
 
     asociado = graphene.Field(AsociadoNode)
 
@@ -114,20 +103,10 @@ class UpdateAsociado(graphene.Mutation):
         asociado.telefono=telefono if telefono is not None else asociado.telefono,
         asociado.direccion=direccion if direccion is not None else asociado.direccion,
         asociado.correo=correo if correo is not None else asociado.correo
-
-        if especialidad is not None:
-            especialidad_set = []
-            for especialidad_id in especialidad:
-                especialidad_object = Especialidad.objects.get(pk=especialidad_id)
-                especialidad_set.append(especialidad_object)
-            asociado.especialidad.set(especialidad_set)
-
-        if subespecialidad is not None:
-            subespecialidad_set = []
-            for subespecialidad_id in subespecialidad:
-                subespecialidad_object = Subespecialidad.objects.get(pk=subespecialidad_id)
-                subespecialidad_set.append(subespecialidad_object)
-            asociado.subespecialidad.set(subespecialidad_set)
+        asociado.especialidad = null
+        asociado.subespecialidad = null
+        asociado.especialidad = Especialidad.objects.get(pk=especialidad) if especialidad is not None else asociado.especialidad,
+        asociado.subespecialidad = Subespecialidad.objects.get(pk=subespecialidad) if subespecialidad is not None else asociado.subespecialidad
             
         asociado.save()
 

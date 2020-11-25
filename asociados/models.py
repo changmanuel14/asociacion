@@ -27,10 +27,10 @@ class Asociado(models.Model):
     correo = models.EmailField()
     direccion = models.CharField(max_length=100)
     especialidad = models.ForeignKey(
-        Especialidad, related_name="asociados", on_delete=models.CASCADE
+        Especialidad, related_name="especialidad", on_delete=models.CASCADE, blank=True, null=True
     )
     subespecialidad = models.ForeignKey(
-        Subespecialidad, related_name="asociados", on_delete=models.CASCADE
+        Subespecialidad, related_name="subespecialidad", on_delete=models.CASCADE, blank=True, null=True
     )
 
     def __str__(self):
